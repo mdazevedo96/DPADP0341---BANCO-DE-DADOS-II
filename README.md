@@ -6,9 +6,7 @@ O domínio escolhido foi uma plataforma de streaming de músicas, com artistas, 
 
 ## Modelo Conceitual (ER)
 
-```text
-Artista ──(1,1)── lança ──(1,n)── Música ──(1,n)── pertence ──(1,n)── Playlist
-```
+![Diagrama ER](modelo_er.png)
 
 Relacionamentos:
 - Artista lança Música → 1:N
@@ -137,5 +135,5 @@ Depois cole o conteúdo do arquivo `streaming_v2.js` inteiro.
 ├── README.md
 ├── streaming_v1.js
 ├── streaming_v2.js
-└── modelo_er.pdf
+└── modelo_er.png
 ```
