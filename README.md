@@ -39,24 +39,13 @@ musicas_playlists  { musica_id, playlist_id }
 Lista nome do artista, quantidade de músicas e duração média, para artistas Rock com mais de uma música, ordenado por duração média decrescente.
 
 ```js
-use streaming_v1
-
 db.artistas_v1.aggregate([
-  { $match: { genero: "Rock" } },
-  { $unwind: "$musicas" },
-  { $group: {
-      _id: "$nome",
-      total_musicas: { $sum: 1 },
-      duracao_media: { $avg: "$musicas.duracao" }
-  }},
-  { $match: { total_musicas: { $gt: 1 } } },
-  { $sort: { duracao_media: -1 } },
-  { $project: {
-      _id: 0,
-      artista: "$_id",
-      total_musicas: 1,
-      duracao_media: { $round: ["$duracao_media", 0] }
-  }}
+    { $match: { genero: "Rock" } },
+    { $unwind: "$musicas" },
+    { $group: { _id: "$nome", total_musicas: { $sum: 1 }, duracao_media: { $avg: "$musicas.duracao" } }},
+    { $match: { total_musicas: { $gt: 1 } } },
+    { $sort: { duracao_media: -1 } },
+    { $project: { _id: 0, artista: "$_id", total_musicas: 1, duracao_media: { $round: ["$duracao_media", 0] } }}
 ])
 ```
 
@@ -65,30 +54,10 @@ db.artistas_v1.aggregate([
 Lista nome da playlist, quantidade de músicas e o título da música mais longa, filtrando só playlists criadas em 2024.
 
 ```js
-use streaming_v1
-
 db.playlists_v1.aggregate([
-  { $match: {
-      data_criacao: {
-        $gte: ISODate("2024-01-01"),
-        $lt:  ISODate("2025-01-01")
-      }
-  }},
-  { $addFields: {
-      total_musicas: { $size: "$musicas" },
-      musica_mais_longa: {
-        $arrayElemAt: [
-          { $sortArray: { input: "$musicas", sortBy: { duracao: -1 } } },
-          0
-        ]
-      }
-  }},
-  { $project: {
-      _id: 0,
-      playlist: "$nome",
-      total_musicas: 1,
-      musica_mais_longa: "$musica_mais_longa.titulo"
-  }}
+    { $match: { data_criacao: { $gte: ISODate("2024-01-01"), $lt: ISODate("2025-01-01") } }},
+    { $addFields: { total_musicas: { $size: "$musicas" }, musica_mais_longa: { $arrayElemAt: [ { $sortArray: { input: "$musicas", sortBy: { duracao: -1 } } }, 0 ] } }},
+    { $project: { _id: 0, playlist: "$nome", total_musicas: 1, musica_mais_longa: "$musica_mais_longa.titulo" }}
 ])
 ```
 
@@ -97,30 +66,14 @@ db.playlists_v1.aggregate([
 Mesma consulta da V1-A, mas usando `$lookup` para juntar as coleções `artistas_v2` e `musicas_v2`.
 
 ```js
-use streaming_v2
-
 db.artistas_v2.aggregate([
-  { $match: { genero: "Rock" } },
-  { $lookup: {
-      from:         "musicas_v2",
-      localField:   "_id",
-      foreignField: "artista_id",
-      as:           "musicas"
-  }},
-  { $unwind: "$musicas" },
-  { $group: {
-      _id: "$nome",
-      total_musicas: { $sum: 1 },
-      duracao_media: { $avg: "$musicas.duracao" }
-  }},
-  { $match: { total_musicas: { $gt: 1 } } },
-  { $sort: { duracao_media: -1 } },
-  { $project: {
-      _id: 0,
-      artista: "$_id",
-      total_musicas: 1,
-      duracao_media: { $round: ["$duracao_media", 0] }
-  }}
+    { $match: { genero: "Rock" } },
+    { $lookup: { from: "musicas_v2", localField: "_id", foreignField: "artista_id", as: "musicas" }},
+    { $unwind: "$musicas" },
+    { $group: { _id: "$nome", total_musicas: { $sum: 1 }, duracao_media: { $avg: "$musicas.duracao" } }},
+    { $match: { total_musicas: { $gt: 1 } } },
+    { $sort: { duracao_media: -1 } },
+    { $project: { _id: 0, artista: "$_id", total_musicas: 1, duracao_media: { $round: ["$duracao_media", 0] } }}
 ])
 ```
 
@@ -129,41 +82,15 @@ db.artistas_v2.aggregate([
 Mesma consulta da V1-B, mas usando dois `$lookup` para atravessar a coleção intermediária `musicas_playlists`.
 
 ```js
-use streaming_v2
-
 db.playlists_v2.aggregate([
-  { $match: {
-      data_criacao: {
-        $gte: ISODate("2024-01-01"),
-        $lt:  ISODate("2025-01-01")
-      }
-  }},
-  { $lookup: {
-      from:         "musicas_playlists",
-      localField:   "_id",
-      foreignField: "playlist_id",
-      as:           "relacoes"
-  }},
-  { $unwind: "$relacoes" },
-  { $lookup: {
-      from:         "musicas_v2",
-      localField:   "relacoes.musica_id",
-      foreignField: "_id",
-      as:           "musica"
-  }},
-  { $unwind: "$musica" },
-  { $sort: { "musica.duracao": -1 } },
-  { $group: {
-      _id:          "$nome",
-      total_musicas: { $sum: 1 },
-      musica_mais_longa: { $first: "$musica.titulo" }
-  }},
-  { $project: {
-      _id: 0,
-      playlist: "$_id",
-      total_musicas: 1,
-      musica_mais_longa: 1
-  }}
+    { $match: { data_criacao: { $gte: ISODate("2024-01-01"), $lt: ISODate("2025-01-01") } }},
+    { $lookup: { from: "musicas_playlists", localField: "_id", foreignField: "playlist_id", as: "relacoes" }},
+    { $unwind: "$relacoes" },
+    { $lookup: { from: "musicas_v2", localField: "relacoes.musica_id", foreignField: "_id", as: "musica" }},
+    { $unwind: "$musica" },
+    { $sort: { "musica.duracao": -1 } },
+    { $group: { _id: "$nome", total_musicas: { $sum: 1 }, musica_mais_longa: { $first: "$musica.titulo" } }},
+    { $project: { _id: 0, playlist: "$_id", total_musicas: 1, musica_mais_longa: 1 }}
 ])
 ```
 
@@ -191,22 +118,18 @@ mongosh --port 27017
 ```
 
 **5. Executar a Versão 1:**
-
-No mongosh, primeiro mude para o banco:
 ```js
 use streaming_v1
 ```
 Depois cole o conteúdo do arquivo `streaming_v1.js` inteiro.
 
 **6. Executar a Versão 2:**
-
-No mongosh, mude para o banco:
 ```js
 use streaming_v2
 ```
 Depois cole o conteúdo do arquivo `streaming_v2.js` inteiro.
 
-> Os comandos `use` precisam ser executados separadamente — não podem estar dentro do bloco colado.
+> O comando `use` precisa ser executado separadamente antes de colar cada arquivo.
 
 ## Arquivos
 
