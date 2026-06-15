@@ -171,16 +171,26 @@ db.playlists_v2.aggregate([
 
 Precisa ter o Docker Desktop instalado e rodando.
 
+**1. Baixar a imagem do MongoDB:**
 ```bash
-# subir o container (primeira vez)
-docker run -d --name mongo -p 27017:27017 mongo
-
-# se o container já existir
-docker start mongo
-
-# conectar ao mongosh
-docker exec -it mongo mongosh
+docker pull mongodb/mongodb-community-server:latest
 ```
+
+**2. Criar o container:**
+```bash
+docker run --name mongodb -p 27017:27017 -d mongodb/mongodb-community-server:latest
+```
+
+**3. Abrir o terminal do container no Docker Desktop:**
+
+No Docker Desktop, clicar nos três pontos ao lado do container `mongodb` → **Open in terminal**
+
+**4. Dentro do terminal, conectar ao mongosh:**
+```bash
+mongosh --port 27017
+```
+
+**5. Colar o script:**
 
 Dentro do mongosh, cole o conteúdo do arquivo `mongodb_streaming.js` — primeiro a `streaming_v1`, depois a `streaming_v2`.
 
