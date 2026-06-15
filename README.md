@@ -190,14 +190,29 @@ No Docker Desktop, clicar nos três pontos ao lado do container `mongodb` → **
 mongosh --port 27017
 ```
 
-**5. Colar o script:**
+**5. Executar a Versão 1:**
 
-Dentro do mongosh, cole o conteúdo do arquivo `mongodb_streaming.js` — primeiro a `streaming_v1`, depois a `streaming_v2`.
+No mongosh, primeiro mude para o banco:
+```js
+use streaming_v1
+```
+Depois cole o conteúdo do arquivo `streaming_v1.js` inteiro.
+
+**6. Executar a Versão 2:**
+
+No mongosh, mude para o banco:
+```js
+use streaming_v2
+```
+Depois cole o conteúdo do arquivo `streaming_v2.js` inteiro.
+
+> Os comandos `use` precisam ser executados separadamente — não podem estar dentro do bloco colado.
 
 ## Arquivos
 
 ```text
 ├── README.md
-├── mongodb_streaming.js
+├── streaming_v1.js
+├── streaming_v2.js
 └── modelo_er.pdf
 ```
