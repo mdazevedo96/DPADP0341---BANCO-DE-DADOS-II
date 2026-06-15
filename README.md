@@ -6,7 +6,7 @@ O domínio escolhido foi uma plataforma de streaming de músicas, com artistas, 
 
 ## Modelo Conceitual (ER)
 
-```
+```text
 Artista ──(1,1)── lança ──(1,n)── Música ──(1,n)── pertence ──(1,n)── Playlist
 ```
 
@@ -18,14 +18,14 @@ Relacionamentos:
 
 **Versão 1 — Embedded (`streaming_v1`):** músicas embutidas dentro do artista e da playlist.
 
-```
+```text
 artistas_v1  { _id, nome, pais, genero, musicas: [ { titulo, duracao, ano_lanc } ] }
 playlists_v1 { _id, nome, descricao, data_criacao, musicas: [ { titulo, duracao, artista_nome } ] }
 ```
 
 **Versão 2 — Referenced (`streaming_v2`):** coleções separadas com referências entre si. A relação N:N é resolvida com uma coleção intermediária.
 
-```
+```text
 artistas_v2        { _id, nome, pais, genero }
 musicas_v2         { _id, titulo, duracao, ano_lanc, artista_id }
 playlists_v2       { _id, nome, descricao, data_criacao }
@@ -196,7 +196,7 @@ Dentro do mongosh, cole o conteúdo do arquivo `mongodb_streaming.js` — primei
 
 ## Arquivos
 
-```
+```text
 ├── README.md
 ├── mongodb_streaming.js
 └── modelo_er.pdf
